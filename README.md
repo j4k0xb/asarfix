@@ -25,5 +25,8 @@ The key may also be available in plaintext: `node_modules/asarmor/src/encryption
 
 https://github.com/sleeyax/asarmor/blob/2c91d08ba0a00d379d26e7dfb89aa0f1d3b8e05c/src/encryption/main.cpp#L172-L173
 
-It checks process.argv, but you can also debug by using the `NODE_OPTIONS=--inspect` environment variable.
-This only works if the [nodeOptions](https://www.electronjs.org/docs/latest/tutorial/fuses#nodeoptions) fuse isn't disabled.
+It checks process.argv, but this can be bypassed in one of these ways:
+
+- Set the `NODE_OPTIONS=--inspect` environment variable (only works with node, not electron)
+- Open `main.node` in a hex editor and replace the `--inspect` string with anything else of the same length
+- [Modify Fuses](https://book.hacktricks.xyz/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-electron-applications-injection#modifying-electron-fuses)
