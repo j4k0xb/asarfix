@@ -1,0 +1,39 @@
+{
+  "name": "asarfix",
+  "version": "0.1.0",
+  "description": "Fixes/Decrypts asar archives protected by asarmor and asarbreak",
+  "author": "j4k0xb",
+  "license": "GPL-3.0-only",
+  "bin": {
+    "asarfix": "dist/cli.js"
+  },
+  "scripts": {
+    "start": "tsx src/cli.ts",
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/j4k0xb/asarfix.git"
+  },
+  "keywords": [
+    "asar",
+    "asarbreak",
+    "asarmor"
+  ],
+  "dependencies": {
+    "@electron/asar": "^3.2.17",
+    "chromium-pickle-js": "^0.2.0",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "asarbreak": "^1.0.1",
+    "asarmor": "^3.0.1",
+    "tsx": "^4.19.2",
+    "vitest": "^2.1.8"
+  }
+}
