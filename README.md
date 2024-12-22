@@ -23,6 +23,7 @@ The key may also be available in plaintext: `node_modules/asarmor/src/encryption
 
 ## Bypass Debugging Protection
 
-<https://github.com/sleeyax/asarmor/blob/2c91d08ba0a00d379d26e7dfb89aa0f1d3b8e05c/src/encryption/main.cpp#L172-L173>
+https://github.com/sleeyax/asarmor/blob/2c91d08ba0a00d379d26e7dfb89aa0f1d3b8e05c/src/encryption/main.cpp#L172-L173
 
-It checks process.argv, but we can also debug by using the `NODE_OPTIONS=--inspect` environment variable.
+It checks process.argv, but you can also debug by using the `NODE_OPTIONS=--inspect` environment variable.
+This only works if the [nodeOptions](https://www.electronjs.org/docs/latest/tutorial/fuses#nodeoptions) fuse isn't disabled.
