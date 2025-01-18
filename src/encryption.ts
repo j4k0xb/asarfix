@@ -29,9 +29,14 @@ export function decryptFS(fs: Filesystem, key: Buffer): Buffer {
       if (isEncrypted(path)) {
         console.log("Decrypting", path);
 
-        const decrypted = decryptAES(buffer, key);
-        decrypted.copy(files, Number(entry.offset));
-        entry.size = decrypted.length;
+        try {
+          const decrypted = decryptAES(buffer, key);
+          decrypted.copy(files, Number(entry.offset));
+          entry.size = decrypted.length;
+        } catch (error) {
+          console.log("Failed to decrypt", path);
+          buffer.copy(files, Number(entry.offset));
+        }
       } else {
         buffer.copy(files, Number(entry.offset));
       }
