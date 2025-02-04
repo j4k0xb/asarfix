@@ -5,6 +5,7 @@ import { createWriteStream, renameSync } from "fs";
 import { readFile } from "fs/promises";
 import { debloatPatch } from "./debloat.js";
 import { decryptFS } from "./encryption.js";
+import { extractKey } from "./parsers/index.js";
 
 const headerSizeOffset = 8;
 
@@ -23,10 +24,17 @@ export class AsarFix {
 
   async readKey(binaryPath: string) {
     const binary = await readFile(binaryPath);
-    const keyIndex =
-      binary.indexOf("This program has been changed by others.") - 32;
-    this.key = binary.subarray(keyIndex, keyIndex + 32);
-    console.log("Found AES key:", this.key.toString("hex"));
+    // const keyIndex =
+    //   binary.indexOf("This program has been changed by others.") - 32;
+    // this.key = binary.subarray(keyIndex, keyIndex + 32);
+    this.key = extractKey(binary);
+    if (this.key) {
+      console.log("Found AES key:", this.key.toString("hex"));
+    } else {
+      console.log(
+        "AES key not found. Please provide it manually via the --key argument."
+      );
+    }
   }
 
   /**
