@@ -27,7 +27,7 @@ export function decrypt(ctx: PluginContext): void {
     const asarmorBinary = getAsarmorBinary(ctx);
     if (!asarmorBinary) {
       console.warn(
-        "main.node binary not found. Please provide it via the path with -b argument, or provide the key with the -k argument."
+        "main.node binary not found. Please provide the path with the -b argument, or provide the key with the -k argument."
       );
       return;
     }
@@ -39,7 +39,7 @@ export function decrypt(ctx: PluginContext): void {
 
   if (key) {
     console.log("Using AES key:", key.toString("hex"));
-    ctx.fileBuffer = decryptFS(ctx.fs, key);
+    ctx.fileBuffer = decryptFS(ctx.fs, entries, key);
   } else {
     console.warn(
       "Failed to find the AES key. Please provide it via the -k argument."
@@ -60,30 +60,22 @@ function getAsarmorBinary(ctx: PluginContext) {
   }
 }
 
-function decryptFS(fs: Filesystem, key: Buffer): Buffer {
+function decryptFS(fs: Filesystem, entries: Entry[], key: Buffer): Buffer {
   const maxSize = statSync(fs.getRootPath()).size - fs.getHeaderSize() - 8;
   const files = Buffer.alloc(maxSize);
 
-  for (const path of fs.listFiles()) {
-    const fullPath = join(fs.getRootPath(), path);
-    const entry = fs.searchNodeFromPath(fullPath);
-    if ("offset" in entry) {
-      const buffer = disk.readFileSync(fs, path, entry);
-      if (isEncrypted(path, buffer)) {
-        console.log("Decrypting", path);
-
-        try {
-          const decrypted = decryptAES(buffer, key);
-          decrypted.copy(files, Number(entry.offset));
-          entry.size = decrypted.length;
-        } catch (error) {
-          console.warn("Failed to decrypt", path);
-          buffer.copy(files, Number(entry.offset));
-        }
-      } else {
-        buffer.copy(files, Number(entry.offset));
+  for (const entry of entries) {
+    try {
+      if (entry.isEncrypted) {
+        const decrypted = decryptAES(entry.buffer, key);
+        decrypted.copy(files, Number(entry.entry.offset));
+        entry.entry.size = decrypted.length;
+        continue;
       }
+    } catch {
+      console.warn("Failed to decrypt", entry.path);
     }
+    entry.buffer.copy(files, Number(entry.entry.offset));
   }
 
   return files;
