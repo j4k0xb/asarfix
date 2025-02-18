@@ -45,28 +45,5 @@ export function decryptFS(fs: Filesystem, key: Buffer): Buffer {
 const base64Regex = /^[A-Za-z0-9+/]+={0,2}$/;
 
 function isEncrypted(path: string, entry: Buffer): boolean {
-  if (extname(path) !== ".js") return false;
-  if (!base64Regex.test(entry.toString())) return false;
-
-  // Calculate entropy only for the file content, not the IV
-  const decoded = Buffer.from(entry.toString(), "base64");
-  const entropy = calculateEntropy(decoded.subarray(16));
-  return entropy >= 7;
-}
-
-function calculateEntropy(buffer: Buffer): number {
-  const freq = new Array(256).fill(0);
-
-  for (const byte of buffer) {
-    freq[byte]++;
-  }
-
-  let entropy = 0;
-  for (let i = 0; i < 256; i++) {
-    if (freq[i] > 0) {
-      const p = freq[i] / buffer.length;
-      entropy -= p * Math.log2(p);
-    }
-  }
-  return entropy;
+  return extname(path) === ".js" && base64Regex.test(entry.toString());
 }
