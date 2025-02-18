@@ -1,6 +1,6 @@
 {
   "name": "asarfix",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Fixes/Decrypts asar archives protected by asarmor and asarbreak",
   "author": "j4k0xb",
   "license": "GPL-3.0-only",
