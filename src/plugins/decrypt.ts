@@ -105,11 +105,12 @@ function getEntries(fs: Filesystem): Entry[] {
     const entry = fs.searchNodeFromPath(fullPath);
     if ("offset" in entry) {
       const buffer = disk.readFileSync(fs, path, entry);
-      if (isEncrypted(path, buffer)) {
-        entries.push({ path, entry, buffer, isEncrypted: true });
-      } else {
-        entries.push({ path, entry, buffer, isEncrypted: false });
-      }
+      entries.push({
+        path,
+        entry,
+        buffer,
+        isEncrypted: isEncrypted(path, buffer),
+      });
     }
   }
   return entries;
