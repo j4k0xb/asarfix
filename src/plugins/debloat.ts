@@ -1,14 +1,14 @@
-import {
-  Filesystem,
-  FilesystemDirectoryEntry,
-} from "@electron/asar/lib/filesystem.js";
+import { FilesystemDirectoryEntry } from "@electron/asar/lib/filesystem.js";
 import { statSync } from "node:fs";
+import { PluginContext } from "../index.js";
 
 const headerSizeOffset = 8;
 
-export function debloatPatch(fs: Filesystem): void {
+export function debloat(ctx: PluginContext): void {
   const maxSize =
-    statSync(fs.getRootPath()).size - fs.getHeaderSize() - headerSizeOffset;
+    statSync(ctx.fs.getRootPath()).size -
+    ctx.fs.getHeaderSize() -
+    headerSizeOffset;
 
   function removeInvalidFiles(dir: FilesystemDirectoryEntry) {
     for (const [name, entry] of Object.entries(dir.files)) {
@@ -31,5 +31,5 @@ export function debloatPatch(fs: Filesystem): void {
     }
   }
 
-  removeInvalidFiles(fs.getHeader() as FilesystemDirectoryEntry);
+  removeInvalidFiles(ctx.fs.getHeader() as FilesystemDirectoryEntry);
 }

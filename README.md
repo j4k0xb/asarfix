@@ -15,8 +15,18 @@ The encryption key is stored in one of these binaries:
 - electron-forge: `resources/app.asar.unpacked/.vite/build/main.node`
 - electron-builder: `resources/app.asar.unpacked/dist/main.node`
 
+Asarfix will automatically search for these binaries and try to extract the key.
+
+Specifying a custom binary path with the `-b` flag:
+
 ```sh
 npx asarfix app.asar -o out.asar -b <path to main.node>
+```
+
+Specifying a custom key with the `-k` flag:
+
+```sh
+npx asarfix app.asar -o out.asar -k <key>
 ```
 
 The key may also be available in plaintext: `node_modules/asarmor/src/encryption/key.txt`.

@@ -5,7 +5,7 @@ import { readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, onTestFinished, test } from "vitest";
-import { AsarFix } from "../src/asarfix";
+import { asarfix } from "../src";
 
 const ASARMOR_BINARY_PATH = require.resolve("asarmor/build/main.node");
 const APP_ASAR_PATH = resolve("test", "app.asar");
@@ -36,9 +36,7 @@ describe("asarmor", () => {
     archive.patch(asarmor.createBloatPatch(1));
     await archive.write(bloatPath);
 
-    const asarfix = new AsarFix(bloatPath);
-    asarfix.patch();
-    await asarfix.write(debloatedPath);
+    await asarfix({ input: bloatPath, output: debloatedPath });
     extractAll(debloatedPath, extractedPath);
 
     await validateExtractedFiles(extractedPath);
@@ -57,9 +55,11 @@ describe("asarmor", () => {
 
     await asarmor.encrypt({ src: APP_ASAR_PATH, dst: encryptedPath });
 
-    const asarfix = new AsarFix(encryptedPath);
-    await asarfix.readKey(ASARMOR_BINARY_PATH);
-    await asarfix.write(decryptedPath);
+    await asarfix({
+      input: encryptedPath,
+      output: decryptedPath,
+      binary: ASARMOR_BINARY_PATH,
+    });
     extractAll(decryptedPath, extractedPath);
 
     await validateExtractedFiles(extractedPath);
@@ -88,9 +88,7 @@ describe("asarbreak", () => {
       APP_ASAR_PATH,
     ]);
 
-    const asarfix = new AsarFix(outPath);
-    asarfix.patch();
-    await asarfix.write(fixedPath);
+    await asarfix({ input: outPath, output: fixedPath });
     extractAll(fixedPath, extractedPath);
 
     await validateExtractedFiles(extractedPath);

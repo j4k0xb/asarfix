@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
-import { AsarFix } from "./asarfix";
+import { asarfix } from "./index.js";
 
 interface Options {
   output: string;
@@ -15,12 +15,7 @@ program
   .option("-k, --key <key>", "use AES key (hex) for decryption", parseKey)
   .argument("<archive>", "input asar file")
   .action(async (archive: string, options: Options) => {
-    const asarfix = new AsarFix(archive, options.key);
-    asarfix.patch();
-    if (options.binary) {
-      await asarfix.readKey(options.binary);
-    }
-    await asarfix.write(options.output);
+    await asarfix({ input: archive, ...options });
   })
   .parse(process.argv);
 
