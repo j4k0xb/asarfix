@@ -18,7 +18,7 @@ export function decrypt(ctx: PluginContext): void {
   }
 
   console.log(
-    "Asar contains encrypted entries:",
+    "Encrypted files:",
     encryptedEntries.map((entry) => entry.path)
   );
 
@@ -41,9 +41,7 @@ export function decrypt(ctx: PluginContext): void {
     console.log("Using AES key:", key.toString("hex"));
     ctx.fileBuffer = decryptFS(ctx.fs, entries, key);
   } else {
-    console.warn(
-      "Failed to find the AES key. Please provide it via the -k argument."
-    );
+    console.warn("Please provide the correct AES key with the -k argument.");
   }
 }
 
@@ -67,7 +65,10 @@ function decryptFS(fs: Filesystem, entries: Entry[], key: Buffer): Buffer {
   for (const entry of entries) {
     try {
       if (entry.isEncrypted) {
-        const decrypted = decryptAES(entry.buffer, key);
+        const decoded = Buffer.from(entry.buffer.toString(), "base64");
+        const iv = decoded.subarray(0, 16);
+        const ciphertext = decoded.subarray(16);
+        const decrypted = decryptAES(ciphertext, iv, key);
         decrypted.copy(files, Number(entry.entry.offset));
         entry.entry.size = decrypted.length;
         continue;
@@ -81,12 +82,13 @@ function decryptFS(fs: Filesystem, entries: Entry[], key: Buffer): Buffer {
   return files;
 }
 
-export function decryptAES(buffer: Buffer, key: Buffer): Buffer {
-  const decoded = Buffer.from(buffer.toString(), "base64");
-  const iv = decoded.subarray(0, 16);
-  const content = decoded.subarray(16);
+export function decryptAES(
+  ciphertext: Buffer,
+  iv: Buffer,
+  key: Buffer
+): Buffer {
   const decipher = createDecipheriv("aes-256-cbc", key, iv);
-  const decrypted = decipher.update(content);
+  const decrypted = decipher.update(ciphertext);
   return Buffer.concat([decrypted, decipher.final()]);
 }
 

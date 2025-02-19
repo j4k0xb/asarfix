@@ -20,25 +20,37 @@ export function extractKey(
   } else if ((magic & 0xffff) === MAGIC_DOS) {
     const section = getPESection(binary);
     if (section) {
-      console.log("PE binary detected. Brute-forcing AES key candidates...");
-      for (let i = 0; i < section.length - 32; i += 8) {
-        const key = section.subarray(i, i + 32);
-        try {
-          const decrypted = encryptedBuffers.map((buffer) =>
-            decryptAES(buffer, key)
-          );
-          console.log(
-            `Key candidate (${i / 8}/${section.length / 8}):`,
-            key.toString("hex"),
-            decrypted.map((buffer) => buffer.toString("utf8").slice(0, 32))
-          );
-        } catch {}
-      }
+      console.log("Brute-forcing AES key candidates from PE binary...");
+      bruteForceKey(encryptedBuffers, section);
     }
   } else {
     console.warn(
       `Unknown binary format ${magic.toString(16).padStart(8, "0")}.`
     );
+  }
+}
+
+function bruteForceKey(encryptedBuffers: Buffer[], section: Buffer) {
+  const ivCiphertextPairs = encryptedBuffers.map((buffer) => {
+    const decoded = Buffer.from(buffer.toString(), "base64");
+    const iv = decoded.subarray(0, 16);
+    const ciphertext = decoded.subarray(16);
+    return [iv, ciphertext];
+  });
+
+  for (let i = 0; i < section.length - 32; i += 8) {
+    const key = section.subarray(i, i + 32);
+
+    try {
+      const decrypted = ivCiphertextPairs.map(([iv, ciphertext]) =>
+        decryptAES(ciphertext, iv, key)
+      );
+      console.log(
+        `Key candidate (${i / 8}/${section.length / 8}):`,
+        key.toString("hex"),
+        decrypted.map((buffer) => buffer.toString("utf8").slice(0, 32))
+      );
+    } catch {}
   }
 }
 
