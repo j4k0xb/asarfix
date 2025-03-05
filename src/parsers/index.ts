@@ -48,15 +48,13 @@ function bruteForceKey(
     const key = section.subarray(i, i + 32);
 
     try {
-      const decrypted = ivCiphertextPairs.map(([iv, ciphertext]) =>
-        textDecoder.decode(decryptAES(ciphertext, iv, key))
+      const decrypted = ivCiphertextPairs.map(
+        ([iv, ciphertext]) =>
+          textDecoder.decode(decryptAES(ciphertext, iv, key)).slice(0, 32) + "…"
       );
 
       keyCandidates.push(key);
-      console.log(
-        `- Key candidate ${key.toString("hex")}:`,
-        decrypted.map((str) => str.slice(0, 32))
-      );
+      console.log(`- Key ${key.toString("hex")}:`, decrypted);
     } catch {}
   }
 
