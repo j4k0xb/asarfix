@@ -21,7 +21,7 @@ export function extractKey(
     const section = getPESection(binary);
     if (section) {
       console.log("Brute-forcing AES key candidates from PE binary...");
-      bruteForceKey(encryptedBuffers, section);
+      return bruteForceKey(encryptedBuffers, section);
     }
   } else {
     console.warn(
@@ -30,13 +30,18 @@ export function extractKey(
   }
 }
 
-function bruteForceKey(encryptedBuffers: Buffer[], section: Buffer) {
+function bruteForceKey(
+  encryptedBuffers: Buffer[],
+  section: Buffer
+): Buffer | undefined {
   const ivCiphertextPairs = encryptedBuffers.map((buffer) => {
     const decoded = Buffer.from(buffer.toString(), "base64");
     const iv = decoded.subarray(0, 16);
     const ciphertext = decoded.subarray(16);
     return [iv, ciphertext];
   });
+
+  const keyCandidates: Buffer[] = [];
 
   for (let i = 0; i < section.length - 32; i += 8) {
     const key = section.subarray(i, i + 32);
@@ -45,12 +50,29 @@ function bruteForceKey(encryptedBuffers: Buffer[], section: Buffer) {
       const decrypted = ivCiphertextPairs.map(([iv, ciphertext]) =>
         decryptAES(ciphertext, iv, key)
       );
-      console.log(
-        `Key candidate (${i / 8}/${section.length / 8}):`,
-        key.toString("hex"),
-        decrypted.map((buffer) => buffer.toString("utf8").slice(0, 32))
-      );
+
+      if (decrypted.every(isValidUTF8)) {
+        keyCandidates.push(key);
+        console.log(
+          `Key candidate (${i / 8}/${section.length / 8}):`,
+          key.toString("hex"),
+          decrypted.map((buffer) => buffer.toString("utf8").slice(0, 32))
+        );
+      }
     } catch {}
+  }
+
+  if (keyCandidates.length === 1) {
+    return keyCandidates[0];
+  }
+}
+
+function isValidUTF8(buffer: Buffer) {
+  try {
+    new TextDecoder("utf-8", { fatal: true }).decode(buffer);
+    return true;
+  } catch (e) {
+    return false;
   }
 }
 
