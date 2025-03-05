@@ -25,15 +25,15 @@
     "asarmor"
   ],
   "dependencies": {
-    "@electron/asar": "^3.2.18",
+    "@electron/asar": "^3.3.1",
     "chromium-pickle-js": "^0.2.0",
-    "commander": "^12.1.0"
+    "commander": "^13.1.0"
   },
   "devDependencies": {
-    "@types/node": "^22.13.1",
+    "@types/node": "^22.13.9",
     "asarbreak": "^1.0.1",
     "asarmor": "^3.0.2",
-    "tsx": "^4.19.2",
-    "vitest": "^3.0.5"
+    "tsx": "^4.19.3",
+    "vitest": "^3.0.7"
   }
 }
