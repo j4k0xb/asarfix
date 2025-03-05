@@ -42,37 +42,26 @@ function bruteForceKey(
   });
 
   const keyCandidates: Buffer[] = [];
+  const textDecoder = new TextDecoder("utf-8", { fatal: true });
 
   for (let i = 0; i < section.length - 32; i += 8) {
     const key = section.subarray(i, i + 32);
 
     try {
       const decrypted = ivCiphertextPairs.map(([iv, ciphertext]) =>
-        decryptAES(ciphertext, iv, key)
+        textDecoder.decode(decryptAES(ciphertext, iv, key))
       );
 
-      if (decrypted.every(isValidUTF8)) {
-        keyCandidates.push(key);
-        console.log(
-          `Key candidate (${i / 8}/${section.length / 8}):`,
-          key.toString("hex"),
-          decrypted.map((buffer) => buffer.toString("utf8").slice(0, 32))
-        );
-      }
+      keyCandidates.push(key);
+      console.log(
+        `- Key candidate ${key.toString("hex")}:`,
+        decrypted.map((str) => str.slice(0, 32))
+      );
     } catch {}
   }
 
   if (keyCandidates.length === 1) {
     return keyCandidates[0];
-  }
-}
-
-function isValidUTF8(buffer: Buffer) {
-  try {
-    new TextDecoder("utf-8", { fatal: true }).decode(buffer);
-    return true;
-  } catch (e) {
-    return false;
   }
 }
 
