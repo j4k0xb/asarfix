@@ -18,8 +18,8 @@ export function debloat(ctx: PluginContext): void {
       } else if ("files" in entry) {
         removeInvalidFiles(entry);
       } else if ("offset" in entry) {
-        const offset = parseInt(String(entry.offset));
-        const size = parseInt(String(entry.size));
+        const offset = Number(entry.offset);
+        const size = Number(entry.size);
         if (offset < 0 || size < 0 || offset + size > maxSize) {
           console.log(`Removing ${name} (offset: ${offset}, size: ${size})`);
           delete dir.files[name];
